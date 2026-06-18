@@ -9,7 +9,8 @@ import {
   XCircle,
   Search,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Trash2
 } from 'lucide-react'
 
 interface CallLog {
@@ -61,6 +62,12 @@ export default function CallLogsPage() {
     setLoading(false)
   }
 
+  const deleteCall = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this call log?')) return
+    await supabase.from('call_logs').delete().eq('id', id)
+    await fetchCalls()
+  }
+
   const formatDuration = (seconds: number) => {
     if (!seconds) return '0:00'
     const m = Math.floor(seconds / 60)
@@ -88,7 +95,6 @@ export default function CallLogsPage() {
   return (
     <div className="space-y-6">
 
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Call Logs</h1>
         <p className="text-gray-500 mt-1">Every call Sarah handled — transcripts and summaries</p>
@@ -179,7 +185,8 @@ export default function CallLogsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  {/* Right side buttons */}
+                  <div className="flex items-center gap-2">
                     {call.appointment_booked ? (
                       <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-xl border border-emerald-200">
                         <CheckCircle className="w-3.5 h-3.5" />
@@ -192,10 +199,16 @@ export default function CallLogsPage() {
                       </span>
                     )}
                     <button
-                      onClick={() =>
-                        setExpanded(expanded === call.id ? null : call.id)
-                      }
+                      onClick={() => deleteCall(call.id)}
+                      className="p-2 hover:bg-red-50 rounded-xl transition-colors text-red-400 hover:text-red-600"
+                      title="Delete call log"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setExpanded(expanded === call.id ? null : call.id)}
                       className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                      title="View transcript"
                     >
                       {expanded === call.id ? (
                         <ChevronUp className="w-4 h-4 text-gray-400" />
@@ -216,13 +229,13 @@ export default function CallLogsPage() {
                 )}
 
                 {/* Expanded Transcript */}
-                {expanded === call.id && call.transcript && (
+                {expanded === call.id && (
                   <div className="mt-4 ml-14">
                     <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">
                       Full Transcript
                     </p>
                     <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 whitespace-pre-wrap max-h-64 overflow-y-auto">
-                      {call.transcript}
+                      {call.transcript || 'No transcript available'}
                     </div>
                   </div>
                 )}

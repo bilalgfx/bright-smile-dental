@@ -10,7 +10,8 @@ import {
   XCircle,
   AlertCircle,
   Search,
-  Filter
+  Filter,
+  Trash2
 } from 'lucide-react'
 
 interface Appointment {
@@ -65,10 +66,15 @@ export default function AppointmentsPage() {
 
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id)
-    await supabase
-      .from('appointments')
-      .update({ status })
-      .eq('id', id)
+    await supabase.from('appointments').update({ status }).eq('id', id)
+    await fetchAppointments()
+    setUpdating(null)
+  }
+
+  const deleteAppointment = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this appointment?')) return
+    setUpdating(id)
+    await supabase.from('appointments').delete().eq('id', id)
     await fetchAppointments()
     setUpdating(null)
   }
@@ -105,8 +111,6 @@ export default function AppointmentsPage() {
 
   return (
     <div className="space-y-6">
-
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Appointments</h1>
         <p className="text-gray-500 mt-1">Manage and update all patient appointments</p>
@@ -149,13 +153,10 @@ export default function AppointmentsPage() {
         ) : (
           <div className="divide-y divide-gray-50">
             {filtered.map((apt) => (
-              <div
-                key={apt.id}
-                className="p-5 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div key={apt.id} className="p-5 hover:bg-gray-50 transition-colors">
 
-                  {/* Patient Info */}
+                {/* Top Row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-11 h-11 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                       <span className="text-blue-600 font-semibold">
@@ -175,7 +176,6 @@ export default function AppointmentsPage() {
                     </div>
                   </div>
 
-                  {/* Date, Time, Status */}
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="flex items-center gap-1.5 text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">
                       <Calendar className="w-3.5 h-3.5 text-gray-400" />
@@ -194,53 +194,5 @@ export default function AppointmentsPage() {
 
                 {/* Notes */}
                 {apt.notes && (
-                  <div className="mt-3 ml-15 pl-15">
-                    <p className="text-xs text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
-                      📝 {apt.notes}
-                    </p>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                {apt.status === 'pending' && (
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      onClick={() => updateStatus(apt.id, 'confirmed')}
-                      disabled={updating === apt.id}
-                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      {updating === apt.id ? 'Updating...' : 'Confirm'}
-                    </button>
-                    <button
-                      onClick={() => updateStatus(apt.id, 'cancelled')}
-                      disabled={updating === apt.id}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      Cancel
-                    </button>
-                  </div>
-                )}
-
-                {/* Revert to pending if confirmed or cancelled */}
-                {apt.status !== 'pending' && (
-                  <div className="mt-4">
-                    <button
-                      onClick={() => updateStatus(apt.id, 'pending')}
-                      disabled={updating === apt.id}
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-                    >
-                      <AlertCircle className="w-4 h-4" />
-                      Revert to Pending
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+                  <div className="mt-3">
+                    <p className="text-xs text-gray-400

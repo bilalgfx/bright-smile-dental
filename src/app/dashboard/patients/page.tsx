@@ -7,8 +7,17 @@ import {
   Phone,
   Calendar,
   Search,
-  Clock
+  Clock,
+  Trash2
 } from 'lucide-react'
+
+interface Appointment {
+  id: string
+  service: string
+  appointment_date: string
+  appointment_time: string
+  status: string
+}
 
 interface Patient {
   id: string
@@ -17,14 +26,6 @@ interface Patient {
   email: string
   created_at: string
   appointments?: Appointment[]
-}
-
-interface Appointment {
-  id: string
-  service: string
-  appointment_date: string
-  appointment_time: string
-  status: string
 }
 
 export default function PatientsPage() {
@@ -71,14 +72,19 @@ export default function PatientsPage() {
     setLoading(false)
   }
 
+  const deletePatient = async (id: string) => {
+    if (!confirm('Delete this patient and all their appointments?')) return
+    await supabase.from('appointments').delete().eq('patient_id', id)
+    await supabase.from('patients').delete().eq('id', id)
+    setSelected(null)
+    await fetchPatients()
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-emerald-50 text-emerald-700'
-      case 'cancelled':
-        return 'bg-red-50 text-red-700'
-      default:
-        return 'bg-amber-50 text-amber-700'
+      case 'confirmed': return 'bg-emerald-50 text-emerald-700'
+      case 'cancelled': return 'bg-red-50 text-red-700'
+      default: return 'bg-amber-50 text-amber-700'
     }
   }
 
@@ -92,8 +98,6 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6">
-
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
         <p className="text-gray-500 mt-1">View all patients and their appointment history</p>
@@ -103,8 +107,6 @@ export default function PatientsPage() {
 
         {/* Patient List */}
         <div className="lg:col-span-1 space-y-4">
-
-          {/* Search */}
           <div className="relative">
             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -116,7 +118,6 @@ export default function PatientsPage() {
             />
           </div>
 
-          {/* List */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {filtered.length === 0 ? (
               <div className="p-8 text-center">
@@ -167,25 +168,34 @@ export default function PatientsPage() {
 
               {/* Patient Card */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-2xl">
-                      {selected.full_name.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">{selected.full_name}</h2>
-                    <div className="flex items-center gap-4 mt-1">
-                      <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                        <Phone className="w-4 h-4" />
-                        {selected.phone}
-                      </span>
-                      <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                        <Clock className="w-4 h-4" />
-                        Patient since {new Date(selected.created_at).toLocaleDateString()}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
+                      <span className="text-blue-600 font-bold text-2xl">
+                        {selected.full_name.charAt(0)}
                       </span>
                     </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">{selected.full_name}</h2>
+                      <div className="flex items-center gap-4 mt-1">
+                        <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                          <Phone className="w-4 h-4" />
+                          {selected.phone}
+                        </span>
+                        <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                          <Clock className="w-4 h-4" />
+                          Patient since {new Date(selected.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => deletePatient(selected.id)}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium rounded-xl transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Patient
+                  </button>
                 </div>
               </div>
 
