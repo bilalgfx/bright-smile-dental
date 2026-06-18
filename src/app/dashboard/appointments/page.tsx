@@ -195,4 +195,60 @@ export default function AppointmentsPage() {
                 {/* Notes */}
                 {apt.notes && (
                   <div className="mt-3">
-                    <p className="text-xs text-gray-400
+                    <p className="text-xs text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
+                      📝 {apt.notes}
+                    </p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mt-4 flex-wrap">
+                  {apt.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => updateStatus(apt.id, 'confirmed')}
+                        disabled={updating === apt.id}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        {updating === apt.id ? 'Updating...' : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => updateStatus(apt.id, 'cancelled')}
+                        disabled={updating === apt.id}
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-600 text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Cancel
+                      </button>
+                    </>
+                  )}
+
+                  {apt.status !== 'pending' && (
+                    <button
+                      onClick={() => updateStatus(apt.id, 'pending')}
+                      disabled={updating === apt.id}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                      Revert to Pending
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => deleteAppointment(apt.id)}
+                    disabled={updating === apt.id}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
