@@ -92,7 +92,14 @@ function extractAppointmentDetails(transcript: string) {
     lower.includes('appointment is set') ||
     lower.includes('see you') ||
     lower.includes('all set') ||
-    lower.includes('booked')
+    lower.includes('booked') ||
+    lower.includes('scheduled') ||
+    lower.includes('great, we have you') ||
+    lower.includes('got you down') ||
+    lower.includes('you are all set') ||
+    lower.includes('we will see you') ||
+    lower.includes('appointment has been') ||
+    lower.includes('looking forward')
 
   // Extract name - looks for patterns like "my name is John" or "I'm John"
   const nameMatch =
@@ -126,9 +133,10 @@ function extractAppointmentDetails(transcript: string) {
   const date = dateMatch ? dateMatch[1] : null
 
   // Extract time
-  const timeMatch = transcript.match(
-    /(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i
-  )
+  const timeMatch =
+    transcript.match(/(\d{1,2}:\d{2}\s*(?:am|pm))/i) ||
+    transcript.match(/(\d{1,2}\s*(?:am|pm))/i) ||
+    transcript.match(/(noon|midnight|morning|afternoon|evening)/i)
   const time = timeMatch ? timeMatch[1] : null
 
   return { booked, name, phone, service, date, time }
